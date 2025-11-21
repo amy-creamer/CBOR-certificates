@@ -2,8 +2,10 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdbool.h>
+//constants
+#define BIGUINT_MAX_LEN 64
 
-// ENUMS
+//enums
 typedef enum{ ATTR_INT_TEXT, ATTR_OID_BYTES} AttributeType;
 
 typedef enum{SPECIALTEXT_TEXT,SPECIALTEXT_OID,SPECIALTEXT_BYTES} SpecialTextType;
