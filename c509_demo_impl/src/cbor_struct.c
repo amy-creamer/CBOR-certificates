@@ -3,7 +3,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 //constants
-#define BIGUINT_MAX_LEN 64
+#define BIGUINT_MAX_LEN 256
+#define OID_MAX_ARCS 16
+#define OID_MAX_BYTES 32
 
 //enums
 typedef enum{ ATTR_INT_TEXT, ATTR_OID_BYTES} AttributeType;
@@ -41,12 +43,12 @@ typedef enum {
 } DefinedType;
 
 typedef struct {
-    uint8_t *data;
+    uint8_t data[BIGUINT_MAX_LEN];
     size_t len;
 } BigUint;
 
 typedef struct {
-    uint32_t *arcs;
+    uint32_t arcs[OID_MAX_ARCS];
     size_t arc_count;
 } Oid;
 
@@ -96,7 +98,7 @@ typedef struct Defined {
 //Attribute
 typedef struct {
     int attributeType_int;
-    char *attributeValue_text;
+    SpecialText *attributeValue_text;
 } AttributeInt;
 
 typedef struct {
@@ -115,7 +117,6 @@ typedef struct {
 } Attribute;
 
 //AlgorithmIdentifier
-
 typedef struct{
     Oid algorithm;
     uint8_t *parameters;
@@ -186,7 +187,7 @@ typedef struct {
     } value;
 } SpecialText;
 
-typedef struct { //Name n; n.kind = NAME_ATTR n.value.attributes.items = malloc...
+typedef struct { 
     NameType kind;
 
     union {
