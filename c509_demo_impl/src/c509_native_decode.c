@@ -39,11 +39,11 @@ int c509_certificate_decode(const uint8_t *cbor_data, size_t data_len, C509Certi
     cbor_value_advance(&arr);
 
     //pubkey alg
-    decode_pubkey_alg(&arr,&cert->subj_pubkey_alg);
+    decode_spk_alg(&arr,&cert->subj_pubkey_alg);
     cbor_value_advance(&arr);
 
     //pubkey
-    decode_pubkey(&arr,&cert->subj_pubkey);
+    decode_spk_info(&arr,&cert->subj_pubkey);
     cbor_value_advance(&arr);
 
     //extensions
@@ -70,7 +70,7 @@ CborError decode_oid(CborValue *it, Oid *out){
 
     size_t pos = 0;
     uint8_t first = buf[pos++];
-    uint32_t arc0 = first /40; //as according to OID encoding
+    uint32_t arc0 = first /40; //as according to DER-encoded OID bytes
     uint32_t arc1 = first % 40;
 
     if (oid->arc_count + 2>OID_MAX_ARCS){
@@ -138,24 +138,24 @@ CborError decode_algorithm_identifier(CborValue *it, AlgorithmIdentifier *out){
     CborType t = cbor_value_get_type(it);
 
     if (t==CborIntegerType){
-        alg->kind = ALGID_INT;
+        out->kind = ALGID_INT;
         int v;
         cbor_value_get_int(it,&v);
-        alg->value.AlgIDInt = v;
+        out->value.AlgIDInt = v;
         return CborNoError;
     }
 
     if (t==CborTagType){
-        alg->kind = ALGID_OID;
+        out->kind = ALGID_OID;
         CborTag tag;
         cbor_value_get_tag(it,&tag);
         cbor_value_advance_fixed(it);
-        return decode_oid(it,&alg->value.AlgIDOid);
+        return decode_oid(it,&out->value.AlgIDOid);
     }
 
     if (t==CborArrayType){
         CborValue arr;
-        alg->kind = ALGID_ARR;
+        out->kind = ALGID_ARR;
         cbor_value_enter_container(it,&arr);
 
         //element 0: OID
@@ -166,7 +166,7 @@ CborError decode_algorithm_identifier(CborValue *it, AlgorithmIdentifier *out){
         if (!cbor_value_at_end(&arr)){
             size_t len;
             //allocate parameters buffer and copy
-            len = alg->value.AlgIDArr.parameters_len;
+            len = out->value.AlgIDArr.parameters_len;
             cbor_value_copy_byte_string(&arr, alg->value.AlgIDArr.parameters,&len,&arr);
 
         }
@@ -176,3 +176,52 @@ CborError decode_algorithm_identifier(CborValue *it, AlgorithmIdentifier *out){
     return CborErrorIllegalType;
 
 }
+
+CborError decode_name(CborValue *it, Name *out){
+    CborType t = cbor_value_get_type(it);
+
+    if (t==CborArrayType){
+        CborValue arr;
+        out->kind = NAME_ATTR;
+        cbor_value_enter_container(it,&arr);
+
+        //while processing list
+        while (!cbor_value_at_end(&arr)){
+            decode_attribute(&arr,&out->Value.attributes);
+            cbor_value_advance(&arr);
+        }
+        size_t len;
+        len = out->Value.attributes.count;
+        return cbor_value_leave_container(it,&arr);
+
+
+
+    }
+    if (t==CborTextStringType){
+
+    }
+
+    if (t==CborByteStringType){
+
+    }
+    return CborErrorIllegalType;
+}
+
+CborError decode_validity(CborValue *it, Validity *out){
+    CborType t = cbor_value_get_type(it);
+    if 
+}
+
+CborError decpde_spki(CborValue *it, SubjectPubKeyInfo *out){
+    CborType t = cbor_value_get_type(it)
+
+}
+
+CborError decode_spki_alg(CborValue *it, Defined *out){
+    CborType t = cbor_value_get_type(it);
+    if (t == CborNullType){
+        return CborErrorIllegalType;
+    }
+    
+}
+
