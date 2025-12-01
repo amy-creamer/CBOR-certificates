@@ -79,27 +79,65 @@ CborError encode_signature_alg(CborEncoder *encoder, AlgorithmIdentifier *sig_al
     }
 }
 
-CborError encode_issuer(CborEncoder *encoder, Name name, Name subject){
+CborError encode_issuer(CborEncoder *encoder, Name name){
     
-    if ( name.value.attributes.count == 0 && name.value.attributes.count = =subject.value.attributes.count){
-        cbor_encode_null(&encoder);
-    } else {
-        CborEncoder issuer_array;
-        cbor_encoder_create_array(&encoder, &issuer_array, name.value.attributes.count);
-        for (size_t i = 0; i<name.value.attributes.count; ++i){
-            CborEncoder attr_pair;
-            Attribute *attr = &cert->issuer.attrs[i];
-            cbor_encoder_create_array(&issuer_array,&attr_pair,2);
-            if(attr->kind== ATTR_INT_TEXT){
-
-            }
+    
+    CborEncoder issuer_array;
+    cbor_encoder_create_array(&encoder, &issuer_array, name.value.attributes.count);
+    for (size_t i = 0; i<name.value.attributes.count; ++i){
+        CborEncoder attr_pair;
+        Attribute *attr = &cert->issuer.attrs[i];
+        cbor_encoder_create_array(&issuer_array,&attr_pair,2);
+        if(attr->kind == ATTR_INT_TEXT && ->value.intText.attributeType_int!=0){
+            cbor_encode_int(&attr_pair,attr->value.intText.attributeType_int);
+            cbor_encode_text_string(&attr_pair,(const char*)attr->value.intText.attributeValue_text, attr->value.intText.attributeValue_text.value.bytes.len);
+        } else {
+            cbor_encode_tag(&attr_pair,6);
+            cbor_encode_byte_string(&attr_pair,attr->value.oidBytes.attributeType_oid.arcs,attr->value.oidBytes.bytes_len);
+            cbor_encode_text_String(&attr_pair,attr->value.oidBytes.attributeType_oid.arcs, &attr->value.oidBytes.bytes_len);
         }
-               
+        cbor_encoder_closer_container(&issuer_array,&attr_pair);
+    }
+    cbor_encoder_close_container(&encoder,&issuer_array);
+            
                 
-            }
+            
+
+    }
+
+CborError encode_validity_before(CborEncoder *encoder, ValidityNotBefore validity){
+    cbor_encode_tag(encoder,1);
+    cbor_encode_uint(&encoder,validity
+
+}
+
+CborError encode_validity_after(CborEncoder encoder, ValidityNotAfter validity){
+    if (validity == uINT64_MAX){
+
+        cbor_encode_null(&encoder);
+    } else{
+        cbor_encode_tag(&encoder,1);
+        cbor_encode_uint(&encoder,validity);
+    }
+    
+
+}
+
+CborError encode_spka(CborEncoder *encoder, SubjectPubKeyInfo subject_pub_alg){
+    err = encode_signature_alg(encoder, subject_pub_alg.algorithm);
+    if (err!=CborNoError) return err;
+
+    if (subject_pub_alg.key == PUBKEY_RSA){
+        if (subject_pub_alg.key_data.rsa == 0 || (subject_pub_alg.key_data.rsa.exponent_len == 3 && subject_pub_alg.key_data.rsa.exponent[0] == 0x01 && subject_pub_alg.key_data.rsa.exponent[1] == 0x00 && subject_pub_alg.key_data.rsa.exponent[2] == 0x01)){
+            cbor_encode_tag(&encoder,2);
+            cbor_encode_byte_string(&encoder, subject_pub_alg.key_data.rsa.modulus, subject_pub_alg.key_data.rsa.modulus_len);
+        }else{
+            
+        }
 
     }
 }
+
 
 
 
