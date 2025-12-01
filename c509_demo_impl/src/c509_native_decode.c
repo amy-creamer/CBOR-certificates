@@ -179,31 +179,64 @@ CborError decode_algorithm_identifier(CborValue *it, AlgorithmIdentifier *out){
 
 CborError decode_name(CborValue *it, Name *out){
     CborType t = cbor_value_get_type(it);
+    CborError e;
 
     if (t==CborArrayType){
         CborValue arr;
         out->kind = NAME_ATTR;
-        cbor_value_enter_container(it,&arr);
+        out->Value.attributes.count = 0;
+        err=cbor_value_enter_container(it,&arr);
+        if (err!=CborNoError) return err;
 
         //while processing list
         while (!cbor_value_at_end(&arr)){
-            decode_attribute(&arr,&out->Value.attributes);
-            cbor_value_advance(&arr);
+            //overflow 
+            if (out->Value.attributes.count>=MAX_ATTRIBUTES){
+                return CborErrorDataTooLarge;
+            }
+            Attribute *slot = &out->Value.attributes.items[out->Value.attributes.count];
+
+            err = decode_attribute(&arr,&out->Value.attributes);
+            if (err!=CborNoError) return err;
+            out->Value.attributes.count++;
+            err=cbor_value_advance(&arr);
+            if (err!=CborNoError) return err;
         }
-        size_t len;
-        len = out->Value.attributes.count;
+        
         return cbor_value_leave_container(it,&arr);
 
 
 
     }
-    if (t==CborTextStringType){
+    if (t==CborTextStringType || t==CborByteStringType || t = CborTagType){
+        out->kind=NAME_SPECIALTEXT;
+        if (t==CborTextStringType){
+            size_t len = sizeof(out->Value.special.value);
+            err=cbor_value_copy_text_string(it,out->Value.text,&len,NULL);
+            return err;
+        }
 
+        if (t==CborByteStringType){
+            size_t len = sizeof(out->Value.special.value);
+            err=cbor_value_copy_byte_string(it,out->Value.special.value,&len, NULL);
+            if (err!=CborNoError) return err;
+            return CborNoError;
+
+        }
+
+        if (t==CborTagType){
+            CborTag tag;
+            err = cbor_value_get_tag(it,&tag);
+
+            if(err!=CborNoError) return err;
+            return CborNoError;
+          
+
+        }
+  
     }
 
-    if (t==CborByteStringType){
-
-    }
+   
     return CborErrorIllegalType;
 }
 
@@ -212,16 +245,19 @@ CborError decode_validity(CborValue *it, Validity *out){
     if 
 }
 
-CborError decpde_spki(CborValue *it, SubjectPubKeyInfo *out){
+CborError decpde_spk_info(CborValue *it, SubjectPubKeyInfo *out){
     CborType t = cbor_value_get_type(it)
 
 }
 
-CborError decode_spki_alg(CborValue *it, Defined *out){
+CborError decode_spk_alg(CborValue *it, Defined *out){
     CborType t = cbor_value_get_type(it);
     if (t == CborNullType){
         return CborErrorIllegalType;
     }
-    
+
 }
+/
+
+CborError decode_extensions(CborValue *it, Extensions *out)
 
