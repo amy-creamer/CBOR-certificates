@@ -28,7 +28,7 @@ CborError c509_encode(C509Certificate *cert, uint8_t *buffer, size_t size, size_
 
     //subject
 
-    //spki + special handling RSA/ECDSA
+    //spki handling RSA/ECDSA
 }
 
 
@@ -91,7 +91,7 @@ CborError encode_issuer(CborEncoder *encoder, Name name, Name subject){
             Attribute *attr = &cert->issuer.attrs[i];
             cbor_encoder_create_array(&issuer_array,&attr_pair,2);
             if(attr->kind== ATTR_INT_TEXT){
-                
+
             }
         }
                

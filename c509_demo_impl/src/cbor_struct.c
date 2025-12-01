@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdbool.h>
-//constants
+//constants, TBC
 #define BIGUINT_MAX_LEN 256
 #define OID_MAX_ARCS 16
 #define OID_MAX_BYTES 32

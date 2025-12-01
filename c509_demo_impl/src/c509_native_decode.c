@@ -245,15 +245,19 @@ CborError decode_validity(CborValue *it, Validity *out){
     if 
 }
 
-CborError decpde_spk_info(CborValue *it, SubjectPubKeyInfo *out){
+CborError decpde_spka(CborValue *it, SubjectPubKeyInfo *out){
     CborType t = cbor_value_get_type(it)
 
 }
 
-CborError decode_spk_alg(CborValue *it, Defined *out){
+CborError decode_spki(CborValue *it, Defined *out){
     CborType t = cbor_value_get_type(it);
     if (t == CborNullType){
         return CborErrorIllegalType;
+    }
+
+    if (t==CborIntegerType){
+
     }
 
 }
