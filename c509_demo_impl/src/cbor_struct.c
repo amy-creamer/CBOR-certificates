@@ -6,6 +6,10 @@
 #define BIGUINT_MAX_LEN 256
 #define OID_MAX_ARCS 16
 #define OID_MAX_BYTES 32
+#define MAX_ATTR_TEXT_LEN
+#define MAX_ATTR_BYTES_LEN 
+#define MAX_ATTRIBUTES 16
+
 
 //enums
 typedef enum{ ATTR_INT_TEXT, ATTR_OID_BYTES} AttributeType;
@@ -98,12 +102,12 @@ typedef struct Defined {
 //Attribute
 typedef struct {
     int attributeType_int;
-    SpecialText *attributeValue_text;
+    SpecialText attributeValue_text[MAX_ATTR_TEXT_LEN];
 } AttributeInt;
 
 typedef struct {
     Oid attributeType_oid;
-    uint8_t *attributeValue_bytes;
+    uint8_t attributeValue_bytes[MAX_ATTR_BYTES_LEN];
     size_t bytes_len;
 } AttributeOid;
 
@@ -192,12 +196,12 @@ typedef struct {
 
     union {
         struct{
-            Attribute *items;
+            Attribute items[MAX_ITEMS_ATTR];
             size_t count;
         } attributes;
 
         SpecialText special;
-    } Value;
+    } value;
 } Name;
 
 
